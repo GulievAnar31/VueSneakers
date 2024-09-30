@@ -1,13 +1,5 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
-
-// Определяем тип для пропса
-interface Props {
-	showDrawer: () => void;
-}
-
-// Используем defineProps с указанным типом
-const props = defineProps<Props>();
+const emit = defineEmits(['showDrawer']);
 </script>
 
 <template>
@@ -15,13 +7,14 @@ const props = defineProps<Props>();
 		<div class="flex items-center gap-4">
 			<img class="w-10" src="/logo.png" alt="Logo">
 			<div>
-				<h1 class="text-xl font-bold uppercase">Vue Sneakers</h1>
+				<h1 class="text-xl font-bold uppercase">Guzlik Store</h1>
 				<p class="text-slate-500">Магазин лучших кроссовок</p>
 			</div>
 		</div>
 
 		<ul class="flex items-center gap-10">
-			<li @click="showDrawer()" class="flex items-center gap-3 text-slate-500 hover:text-black cursor-pointer">
+			<li @click="emit('showDrawer')"
+				class="flex items-center gap-3 text-slate-500 hover:text-black cursor-pointer">
 				<img src="/cart.svg" alt="cart">
 				<span>1205 руб</span>
 			</li>

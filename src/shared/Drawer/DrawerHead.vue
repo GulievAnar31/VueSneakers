@@ -1,9 +1,7 @@
 <script setup lang="ts">
-interface Props {
-	closeDrawer: () => void;
-}
+import { inject } from 'vue';
 
-const props = defineProps<Props>();
+const closeDrawer = inject('closeDrawer') as (() => void) | undefined;
 </script>
 <template>
 	<div class="flex items-center gap-5 mb-5">

@@ -9,8 +9,8 @@ const props = defineProps<{
 
 <template>
 	<div class="grid grid-cols-4 gap-5">
-		<div v-for="{ title, imgUrl, price, isFavorite } in props.items" :key="title">
-			<Card :title="title" :imgUrl="imgUrl" :price="price" :isFavorite="isFavorite" />
+		<div v-for="{ title, imgUrl, price, isFavorite, id } in props.items" :key="id">
+			<Card :id="id" :title="title" :imgUrl="imgUrl" :price="price" :isFavorite="isFavorite" />
 		</div>
 	</div>
 </template>

@@ -3,8 +3,9 @@ import MainContainer from './components/MainContainer/MainContainer.vue';
 import Header from './components/Header/Header.vue';
 import Drawer from './shared/Drawer/Drawer.vue';
 import CardList from './shared/Card/CardList.vue';
-import { onBeforeMount, reactive, ref, watch } from 'vue';
+import { onBeforeMount, provide, reactive, ref, watch } from 'vue';
 import { getSneakers, Sneakers } from './services/apiItems';
+import { getFavorites } from './services/apiFavorites';
 
 const sneakersItems = ref<Sneakers>([]);
 
@@ -24,6 +25,8 @@ const onChangeSearchInput = (e) => {
 }
 
 const showDrawer = () => {
+	console.log('aaa');
+
 	isShowDrawer.value = true;
 }
 
@@ -31,31 +34,58 @@ const closeDrawer = () => {
 	isShowDrawer.value = false;
 }
 
-const getItems = async (filters) => {
+const fetchFavorites = async () => {
 	try {
+		const favorites = await getFavorites();
+		return favorites;
+	} catch (err) {
+		console.error(err);
+	}
+};
+
+const fetchSneakers = async (filters) => {
+	try {
+		const favorites = await fetchFavorites();
+
 		const items: Sneakers = await getSneakers(filters);
-		sneakersItems.value = items;
+
+		const favoriteSet = new Set(favorites);
+
+		sneakersItems.value = items.map(item => ({
+			...item,
+			isFavorite: favoriteSet.has(item.id)
+		}));
 	} catch (err) {
 		console.error(err);
 	}
 }
 
-onBeforeMount(getItems);
+const addFavorite = (id: number) => {
+	sneakersItems.value = sneakersItems.value.map((sneaker) => {
+		if (sneaker.id === id) {
+			sneaker.isFavorite = true;
+		}
+		return sneaker;
+	})
+};
+
+onBeforeMount(fetchSneakers);
 
 watch(filters, async () => {
-	await getItems(filters);
+	await fetchSneakers(filters);
 });
+
+provide('addFavorite', addFavorite);
+provide('closeDrawer', closeDrawer);
 </script>
 
 <template>
 	<MainContainer>
-		<Header :showDrawer="showDrawer" />
-		<!-- Исправленный синтаксис для передачи closeDrawer -->
+		<Header @showDrawer="showDrawer" />
 		<Drawer v-if="isShowDrawer" :closeDrawer="closeDrawer" />
 		<div class="p-10">
 			<div class="flex justify-between items-center">
 				<h2 class="text-3xl font-bold mb-6">Все кроссовки</h2>
-
 				<div class="flex gap-2">
 					<label for="sortOptions" class="block mb-2 text-sm font-medium text-gray-700"></label>
 					<select @change="onChangeSelect" id="sortOptions" class="py-2 px-3 border rounded-md outline-none">

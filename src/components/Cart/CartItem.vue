@@ -2,7 +2,7 @@
 defineProps({
 	imgUrl: String,
 	title: String,
-	price: Number,
+	price: String,
 })
 </script>
 <template>

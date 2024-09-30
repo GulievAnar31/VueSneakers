@@ -1,6 +1,7 @@
 import { mande } from "mande";
 
 export interface Sneaker {
+	id: number;
 	title: string;
 	imgUrl: string;
 	price: string;

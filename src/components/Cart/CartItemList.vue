@@ -18,7 +18,7 @@ const getItems = async () => {
 onBeforeMount(getItems)
 </script>
 <template>
-	<div v-for="{ title, imgUrl, price } in sneakersItems" key="" class="flex flex-col flex-1 gap-4">
+	<div v-for="{ title, imgUrl, price, id } in sneakersItems" :key="id" class="flex flex-col flex-1 gap-4">
 		<CartItem :title="title" :imgUrl="imgUrl" :price="price" />
 	</div>
 </template>
