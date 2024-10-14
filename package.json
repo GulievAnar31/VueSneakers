@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "mande": "^2.0.9",
+    "pinia": "^2.2.4",
     "vue": "^3.4.37"
   },
   "devDependencies": {

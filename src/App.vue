@@ -3,77 +3,16 @@ import MainContainer from './components/MainContainer/MainContainer.vue';
 import Header from './components/Header/Header.vue';
 import Drawer from './shared/Drawer/Drawer.vue';
 import CardList from './shared/Card/CardList.vue';
-import { onBeforeMount, provide, reactive, ref, watch } from 'vue';
-import { getSneakers, Sneakers } from './services/apiItems';
-import { getFavorites } from './services/apiFavorites';
+import Filter from './components/FilterBar/Filter.vue';
+import { useSneakers } from './hooks/useSneakers'; // Хук для работы с данными
+import { useDrawer } from './hooks/useDrawer'; // Хук для работы с Drawer
+import { onBeforeMount, provide, watch } from 'vue';
 
-const sneakersItems = ref<Sneakers>([]);
+const { sneakersItems, filters, fetchSneakers, addFavorite, onChangeSearchInput, onChangeSelect } = useSneakers();
+const { isShowDrawer, showDrawer, closeDrawer } = useDrawer();
 
-const isShowDrawer = ref(false);
-
-const filters = reactive({
-	sortBy: '',
-	searchQuery: ''
-});
-
-const onChangeSelect = (e) => {
-	filters.sortBy = e.target.value;
-}
-
-const onChangeSearchInput = (e) => {
-	filters.searchQuery = e.target.value
-}
-
-const showDrawer = () => {
-	console.log('aaa');
-
-	isShowDrawer.value = true;
-}
-
-const closeDrawer = () => {
-	isShowDrawer.value = false;
-}
-
-const fetchFavorites = async () => {
-	try {
-		const favorites = await getFavorites();
-		return favorites;
-	} catch (err) {
-		console.error(err);
-	}
-};
-
-const fetchSneakers = async (filters) => {
-	try {
-		const favorites = await fetchFavorites();
-
-		const items: Sneakers = await getSneakers(filters);
-
-		const favoriteSet = new Set(favorites);
-
-		sneakersItems.value = items.map(item => ({
-			...item,
-			isFavorite: favoriteSet.has(item.id)
-		}));
-	} catch (err) {
-		console.error(err);
-	}
-}
-
-const addFavorite = (id: number) => {
-	sneakersItems.value = sneakersItems.value.map((sneaker) => {
-		if (sneaker.id === id) {
-			sneaker.isFavorite = true;
-		}
-		return sneaker;
-	})
-};
-
-onBeforeMount(fetchSneakers);
-
-watch(filters, async () => {
-	await fetchSneakers(filters);
-});
+onBeforeMount(() => fetchSneakers());
+watch(filters, fetchSneakers);
 
 provide('addFavorite', addFavorite);
 provide('closeDrawer', closeDrawer);
@@ -86,21 +25,8 @@ provide('closeDrawer', closeDrawer);
 		<div class="p-10">
 			<div class="flex justify-between items-center">
 				<h2 class="text-3xl font-bold mb-6">Все кроссовки</h2>
-				<div class="flex gap-2">
-					<label for="sortOptions" class="block mb-2 text-sm font-medium text-gray-700"></label>
-					<select @change="onChangeSelect" id="sortOptions" class="py-2 px-3 border rounded-md outline-none">
-						<option value="title">По названию:</option>
-						<option value="price">По цене (дешевая)</option>
-						<option value="-price">По цене (дорогая)</option>
-					</select>
-
-					<div class="relative">
-						<img class="absolute left-4 top-2.5" src="/search.svg" alt="search">
-						<input @change="onChangeSearchInput"
-							class="border rounded-md p-1.5 pl-10 pr-4 outline-none focus:border-gray-400" type="text"
-							placeholder="Поиск">
-					</div>
-				</div>
+				<Filter :sortBy="filters.sortBy" :searchQuery="filters.searchQuery" @changeSelect="onChangeSelect"
+					@changeSearchInput="onChangeSearchInput" />
 			</div>
 			<CardList :items="sneakersItems" />
 		</div>
