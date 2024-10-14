@@ -1,12 +1,11 @@
-// composables/useSneakers.ts
-import { ref, reactive } from 'vue';
+import { reactive, ref, watchEffect } from 'vue';
 import { getFavorites } from '../services/apiFavorites';
 import { useItemsStore } from '../store/store';
 import { Sneaker } from '../services/apiItems';
 
 export function useSneakers() {
 	const store = useItemsStore();
-	const sneakersItems = ref<Sneaker[]>([]);
+	const sneakers = ref<Sneaker[]>([]);
 	const filters = reactive({ sortBy: '', searchQuery: '' });
 
 	const fetchFavorites = async () => {
@@ -23,19 +22,15 @@ export function useSneakers() {
 		try {
 			const favorites = await fetchFavorites();
 			await store.fetchItems(filters);
-			const favoriteSet = new Set(favorites);
 
-			sneakersItems.value = store.items.map(item => ({
-				...item,
-				isFavorite: favoriteSet.has(item.id)
-			}));
+			// sneakers.value = store.items;
 		} catch (err) {
-			console.error(err);
+			console.error('Ошибка при загрузке кроссовок:', err);
 		}
 	};
 
 	const addFavorite = (id) => {
-		sneakersItems.value = sneakersItems.value.map((sneaker) => {
+		store.items = store.items.map((sneaker) => {
 			if (sneaker.id === id) {
 				sneaker.isFavorite = true;
 			}
@@ -51,5 +46,5 @@ export function useSneakers() {
 		filters.searchQuery = e.target.value;
 	};
 
-	return { sneakersItems, filters, fetchSneakers, addFavorite, onChangeSelect, onChangeSearchInput };
+	return { sneakers, filters, fetchSneakers, addFavorite, onChangeSelect, onChangeSearchInput };
 }

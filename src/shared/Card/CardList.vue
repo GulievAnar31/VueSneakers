@@ -1,16 +1,29 @@
 <script setup lang="ts">
+import { onBeforeMount, ref } from 'vue';
 import Card from './Card.vue';
-import { Sneakers } from '../../services/apiItems';
+import { getSneakers, Sneaker } from '../../services/apiItems';
 
-const props = defineProps<{
-	items: Sneakers;
-}>();
+const sneakers = ref<Sneaker[]>([])
+
+onBeforeMount(async () => {
+	try {
+		const data = await getSneakers();
+
+		sneakers.value = data;
+	} catch (err) {
+		console.error(err);
+	}
+});
 </script>
 
 <template>
-	<div class="grid grid-cols-4 gap-5">
-		<div v-for="{ title, imgUrl, price, isFavorite, id } in props.items" :key="id">
-			<Card :id="id" :title="title" :imgUrl="imgUrl" :price="price" :isFavorite="isFavorite" />
+	<div v-if="sneakers && sneakers.length > 0" class="grid grid-cols-4 gap-5">
+		<div v-for="sneaker in sneakers" :key="sneaker.id">
+			<Card :id="sneaker.id" :title="sneaker.title" :imgUrl="sneaker.imgUrl" :price="sneaker.price"
+				:isFavorite="sneaker.isFavorite" />
 		</div>
+	</div>
+	<div v-else>
+		<p>Данные загружаются...</p>
 	</div>
 </template>
